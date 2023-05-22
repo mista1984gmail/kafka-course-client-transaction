@@ -1,0 +1,10 @@
+server:
+  port: 8081
+
+topic:
+  send-client: send.client
+  send-transaction: send.transaction
+
+spring:
+  kafka:
+    bootstrap-servers: localhost:29092
