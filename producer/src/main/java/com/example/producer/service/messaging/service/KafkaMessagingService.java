@@ -15,7 +15,6 @@ public class KafkaMessagingService {
     private String sendClientTopic;
     @Value("${topic.send-transaction}")
     private String sendTransactionTopic;
-
     private final KafkaTemplate<String , Object> kafkaTemplate;
 
     public void sendClient(ClientSendEvent clientSendEvent) {
