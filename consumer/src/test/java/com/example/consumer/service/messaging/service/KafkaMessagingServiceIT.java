@@ -1,14 +1,12 @@
 package com.example.consumer.service.messaging.service;
 
 import com.example.consumer.domain.entity.Client;
-import com.example.consumer.domain.entity.Transaction;
 import com.example.consumer.domain.entity.TransactionFailed;
 import com.example.consumer.domain.repository.ClientRepository;
 import com.example.consumer.domain.repository.TransactionFailedRepository;
 import com.example.consumer.service.ClientService;
 import com.example.consumer.service.TransactionFailedService;
 import com.example.consumer.service.dto.ClientDto;
-import com.example.consumer.service.dto.TransactionDto;
 import com.example.consumer.service.messaging.event.ClientEvent;
 import com.example.consumer.service.messaging.event.TransactionEvent;
 import com.example.util.FakeClient;
@@ -53,7 +51,7 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 @DirtiesContext
 @Testcontainers
-class KafkaMessagingServiceTest {
+class KafkaMessagingServiceIT {
     public static final String TOPIC_NAME_SEND_CLIENT = "send.client";
     public static final String TOPIC_NAME_SEND_TRANSACTION = "send.transaction";
     @Container

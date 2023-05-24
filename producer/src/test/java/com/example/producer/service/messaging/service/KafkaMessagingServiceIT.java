@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true")
 @Testcontainers
-class KafkaMessagingServiceTest {
+class KafkaMessagingServiceIT {
 
     public static final String TOPIC_NAME_SEND_CLIENT = "send.client";
     public static final String TOPIC_NAME_SEND_TRANSACTION = "send.transaction";
