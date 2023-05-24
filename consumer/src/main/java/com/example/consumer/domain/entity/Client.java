@@ -35,4 +35,10 @@ public class Client {
         transactions.add(transaction);
     }
 
+    public Client(String firstName, String lastName, String address, String email) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.address = address;
+        this.email = email;
+    }
 }

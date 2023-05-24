@@ -19,4 +19,11 @@ public class ClientDto {
     private String address;
     private String email;
     private List<Transaction> transactions;
+
+    public ClientDto(String firstName, String lastName, String address, String email) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.address = address;
+        this.email = email;
+    }
 }

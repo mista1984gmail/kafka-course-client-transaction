@@ -12,6 +12,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.concurrent.CountDownLatch;
+
 @Slf4j
 @Service
 @AllArgsConstructor
@@ -19,8 +21,6 @@ public class KafkaMessagingService {
     private static final String topicCreateClient = "${topic.send-client}";
     private static final String topicCreateTransaction = "${topic.send-transaction}";
     private static final String kafkaConsumerGroupId = "${spring.kafka.consumer.group-id}";
-
-
     private final ClientService clientService;
     private final TransactionFailedService transactionFailedService;
     private final ModelMapper modelMapper;
@@ -45,5 +45,4 @@ public class KafkaMessagingService {
         }
         return transactionEvent;
     }
-
 }
