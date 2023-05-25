@@ -10,7 +10,8 @@ public class FakeClient {
                 "Ivan",
                 "Ivanov",
                 "Grodno, Pobedy, 123/45",
-                "ivan2000@gmail.com");
+                "ivan2000@gmail.com",
+                "375291234567");
     }
 
 }

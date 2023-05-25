@@ -27,6 +27,8 @@ public class Client {
     private String address;
     @Column(name = "email")
     private String email;
+    @Column(name = "telephone")
+    private String telephone;
     @OneToMany(mappedBy = "owner", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JsonIgnore
     private List<Transaction> transactions;
@@ -35,10 +37,11 @@ public class Client {
         transactions.add(transaction);
     }
 
-    public Client(String firstName, String lastName, String address, String email) {
+    public Client(String firstName, String lastName, String address, String email, String telephone) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.address = address;
         this.email = email;
+        this.telephone = telephone;
     }
 }

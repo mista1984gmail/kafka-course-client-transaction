@@ -5,6 +5,7 @@ import com.example.consumer.service.dto.ClientDto;
 import com.example.consumer.service.messaging.event.TransactionEvent;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ClientService {
 
@@ -15,4 +16,5 @@ public interface ClientService {
 
     boolean isExistClient(Long id);
     Client addTransactionToClient(TransactionEvent transactionEvent);
+    Optional<Client> findByEmail(String email);
 }

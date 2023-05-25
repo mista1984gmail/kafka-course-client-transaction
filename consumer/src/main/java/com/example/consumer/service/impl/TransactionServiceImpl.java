@@ -22,7 +22,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     public TransactionDto save(TransactionDto transactionDto) {
-        log.debug("Save transaction: {}", transactionDto);
+        log.info("Save transaction: {}", transactionDto);
         return modelMapper.map(transactionRepository.save(
                 modelMapper.map(transactionDto, Transaction.class)), TransactionDto.class);
     }

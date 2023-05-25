@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -40,5 +41,24 @@ public class TransactionFailedServiceImpl implements TransactionFailedService {
                 .incorrectId(transactionEvent.getClientId())
                 .error(ErrorName.NOT_FOUND_CLIENT_ID)
                 .build();
+    }
+
+    @Override
+    public List<TransactionFailed> findAll() {
+        log.info("Find all failed transaction");
+        return transactionFailedRepository.findAll();
+    }
+
+    @Override
+    public List<TransactionFailed> findByIncorrectId(Long id) {
+        log.info("Find all failed transaction");
+        return transactionFailedRepository.findByIncorrectId(id);
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        log.info("Delete transaction by id: " + id);
+        transactionFailedRepository.deleteById(id);
     }
 }

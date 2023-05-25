@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -118,6 +119,7 @@ class KafkaMessagingServiceIT {
         assertEquals(client.getLastName(), records.iterator().next().value().getLastName());
         assertEquals(client.getAddress(), records.iterator().next().value().getAddress());
         assertEquals(client.getEmail(), records.iterator().next().value().getEmail());
+        assertEquals(client.getTelephone(), records.iterator().next().value().getTelephone());
 
         //then
         kafkaMessagingService.createClient(clientEvent);
@@ -168,6 +170,7 @@ class KafkaMessagingServiceIT {
         assertEquals(transactionEvent.getCreatedAt(), records.iterator().next().value().getCreatedAt());
 
         //then
+
         kafkaMessagingService.createTransaction(transactionEvent);
 
         when(clientService.isExistClient(transactionEvent.getClientId())).thenReturn(true);

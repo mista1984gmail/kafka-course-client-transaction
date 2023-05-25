@@ -79,6 +79,7 @@ class KafkaMessagingServiceIT {
         assertEquals(client.getLastName(), records.iterator().next().value().getLastName());
         assertEquals(client.getAddress(), records.iterator().next().value().getAddress());
         assertEquals(client.getEmail(), records.iterator().next().value().getEmail());
+        assertEquals(client.getTelephone(), records.iterator().next().value().getTelephone());
 
     }
 

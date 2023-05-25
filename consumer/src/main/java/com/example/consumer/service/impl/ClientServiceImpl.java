@@ -79,6 +79,13 @@ public class ClientServiceImpl implements ClientService {
         return client;
     }
 
+    @Override
+    public Optional<Client> findByEmail(String email) {
+        log.info("Find client by email: {}", email);
+        return clientRepository.findByEmail(email);
+
+    }
+
     private Client getById(Long id) {
         return clientRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(

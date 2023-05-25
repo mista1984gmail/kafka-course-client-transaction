@@ -12,7 +12,8 @@ public class FakeClient {
                 "Ivan",
                 "Ivanov",
                 "Grodno, Pobedy, 123/45",
-                "ivan2000@gmail.com");
+                "ivan2000@gmail.com",
+                "+375291234567");
     }
 
     public static Client getClient(){
@@ -20,14 +21,16 @@ public class FakeClient {
                 "Ivan",
                 "Ivanov",
                 "Grodno, Pobedy, 123/45",
-                "ivan2000@gmail.com");
+                "ivan2000@gmail.com",
+                "+375291234567");
     }
     public static ClientDto getClientDto(){
         return new ClientDto(
                 "Ivan",
                 "Ivanov",
                 "Grodno, Pobedy, 123/45",
-                "ivan2000@gmail.com");
+                "ivan2000@gmail.com",
+                "+375291234567");
     }
 
 }

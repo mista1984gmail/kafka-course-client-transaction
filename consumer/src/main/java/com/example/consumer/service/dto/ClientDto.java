@@ -17,13 +17,15 @@ public class ClientDto {
     private String firstName;
     private String lastName;
     private String address;
+    private String telephone;
     private String email;
     private List<Transaction> transactions;
 
-    public ClientDto(String firstName, String lastName, String address, String email) {
+    public ClientDto(String firstName, String lastName, String address, String email, String telephone) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.address = address;
         this.email = email;
+        this.telephone = telephone;
     }
 }

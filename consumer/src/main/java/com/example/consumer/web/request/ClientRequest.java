@@ -17,5 +17,6 @@ public class ClientRequest {
     private String lastName;
     private String address;
     private String email;
+    private String telephone;
     private List<Transaction> transactions;
 }

@@ -15,4 +15,5 @@ public class ClientEvent {
     private String lastName;
     private String address;
     private String email;
+    private String telephone;
 }

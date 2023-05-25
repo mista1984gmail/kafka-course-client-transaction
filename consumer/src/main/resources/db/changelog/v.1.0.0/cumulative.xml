@@ -7,4 +7,5 @@
     <include file="2023-05-19-1-create-table-client.xml" relativeToChangelogFile="true" />
     <include file="2023-05-19-2-create-table-transaction.xml" relativeToChangelogFile="true" />
     <include file="2023-05-19-3-create-table-transaction-failed.xml" relativeToChangelogFile="true" />
+    <include file="2023-05-25-4-add-column-telephone-client-table.xml" relativeToChangelogFile="true" />
 </databaseChangeLog>

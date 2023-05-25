@@ -27,6 +27,10 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
 topic:
   send-client: send.client
   send-transaction: send.transaction
