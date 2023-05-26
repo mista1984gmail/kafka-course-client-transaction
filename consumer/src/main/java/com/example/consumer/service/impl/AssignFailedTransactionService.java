@@ -31,7 +31,7 @@ public class AssignFailedTransactionService {
 
     @Transactional
     public void assignFailedTransactionToClient(){
-        log.info("Find all failed transaction");
+        log.info("Find all failed transactions");
         List<TransactionFailed> transactionFaileds = transactionFailedService.findAll();
         log.info("On schedule: checking for a valid client");
         Set<Long> clientsIds = transactionFaileds.stream()

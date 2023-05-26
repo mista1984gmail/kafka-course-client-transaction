@@ -22,10 +22,4 @@ public class ClientServiceImpl implements ClientService {
         return producer.sendClient(clientDto);
     }
 
-    @Override
-    public Optional<Client> findByEmail(String email) {
-        log.info("Find user by email: {}", email);
-        return null;
-
-    }
 }

@@ -1,96 +1,104 @@
 package com.example.consumer.service.messaging.service;
 
 import com.example.consumer.domain.entity.Client;
+import com.example.consumer.domain.entity.Transaction;
 import com.example.consumer.domain.entity.TransactionFailed;
 import com.example.consumer.domain.repository.ClientRepository;
 import com.example.consumer.domain.repository.TransactionFailedRepository;
-import com.example.consumer.service.ClientService;
-import com.example.consumer.service.TransactionFailedService;
-import com.example.consumer.service.dto.ClientDto;
+import com.example.consumer.domain.repository.TransactionRepository;
 import com.example.consumer.service.messaging.event.ClientEvent;
 import com.example.consumer.service.messaging.event.TransactionEvent;
 import com.example.util.FakeClient;
 import com.example.util.FakeTransaction;
-import lombok.SneakyThrows;
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.modelmapper.ModelMapper;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.lifecycle.Startables;
 import org.testcontainers.utility.DockerImageName;
 
-import java.time.Duration;
-import java.util.Arrays;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
-@SpringBootTest
-@DirtiesContext
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Testcontainers
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class KafkaMessagingServiceIT {
+    public static final Long CLIENT_ID = 1L;
+    public static final Long TRANSACTIONAL_ID = 1L;
+    public static final Long TRANSACTIONAL_FAILED_ID = 1L;
     public static final String TOPIC_NAME_SEND_CLIENT = "send.client";
     public static final String TOPIC_NAME_SEND_TRANSACTION = "send.transaction";
+
     @Container
-    static final KafkaContainer kafka = new KafkaContainer(
-            DockerImageName.parse("confluentinc/cp-kafka:7.3.3")
-    );
+    static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:12")
+            .withUsername("username")
+            .withPassword("password")
+            .withExposedPorts(5432)
+            .withReuse(true);
+    @Container
+    static final KafkaContainer kafkaContainer =
+                new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:6.2.4"))
+            .withEmbeddedZookeeper()
+          .withEnv("KAFKA_LISTENERS", "PLAINTEXT://0.0.0.0:9093 ,BROKER://0.0.0.0:9092")
+          .withEnv("KAFKA_LISTENER_SECURITY_PROTOCOL_MAP", "BROKER:PLAINTEXT,PLAINTEXT:PLAINTEXT")
+          .withEnv("KAFKA_INTER_BROKER_LISTENER_NAME", "BROKER")
+          .withEnv("KAFKA_BROKER_ID", "1")
+          .withEnv("KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR", "1")
+          .withEnv("KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS", "1")
+          .withEnv("KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR", "1")
+          .withEnv("KAFKA_TRANSACTION_STATE_LOG_MIN_ISR", "1")
+          .withEnv("KAFKA_LOG_FLUSH_INTERVAL_MESSAGES", Long.MAX_VALUE + "")
+          .withEnv("KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS", "0");
+
+    static {
+        Startables.deepStart(Stream.of(postgreSQLContainer, kafkaContainer)).join();
+    }
 
     @DynamicPropertySource
     static void overrideProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
+        registry.add("spring.kafka.bootstrap-servers", kafkaContainer::getBootstrapServers);
+        registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
+        registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
+        registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
+        registry.add("spring.datasource.driver-class-name", postgreSQLContainer::getDriverClassName);
     }
 
-    @Mock
-    private KafkaMessagingService kafkaMessagingService;
-
-    @Mock
-    private ClientService clientService;
-    @Mock
-    private TransactionFailedService transactionFailedService;
-    @Mock
-    private ModelMapper modelMapper;
-
-    @Mock
+    @Autowired
     private ClientRepository clientRepository;
+    @Autowired
+    private TransactionRepository transactionRepository;
 
-    @Mock
+    @Autowired
     private TransactionFailedRepository transactionFailedRepository;
 
 
     @Test
-    @SneakyThrows
-    @DirtiesContext
-    void createClient() {
+    @Order(1)
+    void createClient() throws InterruptedException {
         //given
-        String bootstrapServers = kafka.getBootstrapServers();
+        String bootstrapServers = kafkaContainer.getBootstrapServers();
         ClientEvent clientEvent = FakeClient.getClientEvent();
         Client client = FakeClient.getClient();
-        ClientDto clientDto = FakeClient.getClientDto();
 
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -98,135 +106,84 @@ class KafkaMessagingServiceIT {
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         ProducerFactory<String, ClientEvent> producerFactory = new DefaultKafkaProducerFactory<>(configProps);
         KafkaTemplate<String, ClientEvent> kafkaTemplate = new KafkaTemplate<>(producerFactory);
+
+        //when
+        TimeUnit.SECONDS.sleep(5);
         kafkaTemplate.send(TOPIC_NAME_SEND_CLIENT, clientEvent);
-
-        Properties properties = new Properties();
-        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "group-java-test");
-        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        properties.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-
-        Consumer <String, ClientEvent> consumer = new KafkaConsumer<>(properties);
-        consumer.subscribe(Arrays.asList(TOPIC_NAME_SEND_CLIENT));
-        ConsumerRecords <String, ClientEvent> records = consumer.poll(Duration.ofMillis(10000L));
-        consumer.close();
+        TimeUnit.SECONDS.sleep(5);
 
         //then
-        assertEquals(1, records.count());
-        assertEquals(client.getFirstName(), records.iterator().next().value().getFirstName());
-        assertEquals(client.getLastName(), records.iterator().next().value().getLastName());
-        assertEquals(client.getAddress(), records.iterator().next().value().getAddress());
-        assertEquals(client.getEmail(), records.iterator().next().value().getEmail());
-        assertEquals(client.getTelephone(), records.iterator().next().value().getTelephone());
-
-        //then
-        kafkaMessagingService.createClient(clientEvent);
-
-        when(modelMapper.map(clientEvent, ClientDto.class)).thenReturn(clientDto);
-        when(modelMapper.map(clientDto, Client.class)).thenReturn(client);
-        when(clientRepository.save(client)).thenReturn(client);
-        when(modelMapper.map(client, ClientDto.class)).thenReturn(clientDto);
-
-        verify(kafkaMessagingService,timeout(10000).times(1)).createClient(any());
+        Client clientFromDB = clientRepository.findById(CLIENT_ID).get();
+        assertEquals(clientFromDB.getId(), CLIENT_ID);
+        assertEquals(clientFromDB.getFirstName(), client.getFirstName());
+        assertEquals(clientFromDB.getLastName(), client.getLastName());
+        assertEquals(clientFromDB.getAddress(), client.getAddress());
+        assertEquals(clientFromDB.getEmail(), client.getEmail());
+        assertEquals(clientFromDB.getTelephone(), client.getTelephone());
     }
 
     @Test
-    void createTransactionIfClientExist() {
+    @Order(2)
+    void createTransactionIfClientExist() throws InterruptedException {
 
         //given
-        String bootstrapServers = kafka.getBootstrapServers();
+        String bootstrapServers = kafkaContainer.getBootstrapServers();
         TransactionEvent transactionEvent = FakeTransaction.getTransactionEvent();
-        Client client = FakeClient.getClient();
-        ClientDto clientDto = FakeClient.getClientDto();
 
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+
         ProducerFactory<String, TransactionEvent> producerFactory = new DefaultKafkaProducerFactory<>(configProps);
-        KafkaTemplate<String, TransactionEvent> kafkaTemplate = new KafkaTemplate<>(producerFactory);
-        kafkaTemplate.send(TOPIC_NAME_SEND_TRANSACTION, transactionEvent);
+        KafkaTemplate<String, TransactionEvent> kafkaTemplateTransaction = new KafkaTemplate<>(producerFactory);
 
-        Properties properties = new Properties();
-        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "group-java-test");
-        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        properties.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-
-        Consumer <String, TransactionEvent> consumer = new KafkaConsumer<>(properties);
-        consumer.subscribe(Arrays.asList(TOPIC_NAME_SEND_TRANSACTION));
-        ConsumerRecords <String, TransactionEvent> records = consumer.poll(Duration.ofMillis(10000L));
-        consumer.close();
-
-        assertEquals(transactionEvent.getBank(), records.iterator().next().value().getBank());
-        assertEquals(transactionEvent.getClientId(), records.iterator().next().value().getClientId());
-        assertEquals(transactionEvent.getOrderType(), records.iterator().next().value().getOrderType());
-        assertEquals(transactionEvent.getQuantity(), records.iterator().next().value().getQuantity());
-        assertEquals(transactionEvent.getPrice(), records.iterator().next().value().getPrice());
-        assertEquals(transactionEvent.getCreatedAt(), records.iterator().next().value().getCreatedAt());
+        //when
+        TimeUnit.SECONDS.sleep(5);
+        kafkaTemplateTransaction.send(TOPIC_NAME_SEND_TRANSACTION, transactionEvent);
+        TimeUnit.SECONDS.sleep(5);
 
         //then
-
-        kafkaMessagingService.createTransaction(transactionEvent);
-
-        when(clientService.isExistClient(transactionEvent.getClientId())).thenReturn(true);
-
-        when(clientService.addTransactionToClient(transactionEvent)).thenReturn(client);
-        when(modelMapper.map(client, ClientDto.class)).thenReturn(clientDto);
-        when(clientRepository.save(client)).thenReturn(client);
-
-        verify(kafkaMessagingService,timeout(10000).times(1)).createTransaction(any());
+        Transaction transactionFromDB = transactionRepository.findById(TRANSACTIONAL_ID).get();
+        assertEquals(transactionFromDB.getId(), TRANSACTIONAL_ID);
+        assertEquals(transactionFromDB.getBank(), transactionEvent.getBank());
+        assertEquals(transactionFromDB.getOrderType(), transactionEvent.getOrderType());
+        assertEquals(transactionFromDB.getQuantity(), transactionEvent.getQuantity());
+        assertEquals(transactionFromDB.getPrice(), transactionEvent.getPrice());
+        assertEquals(transactionFromDB.getCreatedAt(), LocalDateTime.of(2023,05,19,00,00));
+        assertEquals(transactionFromDB.getOwner().getId(), CLIENT_ID);
 
     }
     @Test
-    void createTransactionIfClientDoesNotExist() {
-
+    @Order(3)
+    void createTransactionIfClientDoesNotExist() throws InterruptedException {
         //given
-        String bootstrapServers = kafka.getBootstrapServers();
-        TransactionEvent transactionEvent = FakeTransaction.getTransactionEvent();
-        TransactionFailed transactionFailed = FakeTransaction.getTransactionFailed();
+        String bootstrapServers = kafkaContainer.getBootstrapServers();
+        TransactionEvent transactionEvent = FakeTransaction.getTransactionEventFailed();
 
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+
         ProducerFactory<String, TransactionEvent> producerFactory = new DefaultKafkaProducerFactory<>(configProps);
         KafkaTemplate<String, TransactionEvent> kafkaTemplate = new KafkaTemplate<>(producerFactory);
+
+        //when
+        TimeUnit.SECONDS.sleep(5);
         kafkaTemplate.send(TOPIC_NAME_SEND_TRANSACTION, transactionEvent);
-
-        Properties properties = new Properties();
-        properties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        properties.put(ConsumerConfig.GROUP_ID_CONFIG, "group-java-test");
-        properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        properties.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-
-        Consumer <String, TransactionEvent> consumer = new KafkaConsumer<>(properties);
-        consumer.subscribe(Arrays.asList(TOPIC_NAME_SEND_TRANSACTION));
-        ConsumerRecords <String, TransactionEvent> records = consumer.poll(Duration.ofMillis(10000L));
-        consumer.close();
-
-        assertEquals(transactionEvent.getBank(), records.iterator().next().value().getBank());
-        assertEquals(transactionEvent.getClientId(), records.iterator().next().value().getClientId());
-        assertEquals(transactionEvent.getOrderType(), records.iterator().next().value().getOrderType());
-        assertEquals(transactionEvent.getQuantity(), records.iterator().next().value().getQuantity());
-        assertEquals(transactionEvent.getPrice(), records.iterator().next().value().getPrice());
-        assertEquals(transactionEvent.getCreatedAt(), records.iterator().next().value().getCreatedAt());
+        TimeUnit.SECONDS.sleep(5);
 
         //then
-        kafkaMessagingService.createTransaction(transactionEvent);
-
-        when(clientService.isExistClient(transactionEvent.getClientId())).thenReturn(false);
-
-        when(transactionFailedService.getTransactionFailed(transactionEvent)).thenReturn(transactionFailed);
-        when(transactionFailedRepository.save(transactionFailed)).thenReturn(transactionFailed);
-
-        verify(kafkaMessagingService,timeout(10000).times(1)).createTransaction(any());
+        TransactionFailed transactionFromDB = transactionFailedRepository.findById(TRANSACTIONAL_FAILED_ID).get();
+        assertEquals(transactionFromDB.getId(), TRANSACTIONAL_FAILED_ID);
+        assertEquals(transactionFromDB.getBank(), transactionEvent.getBank());
+        assertEquals(transactionFromDB.getOrderType(), transactionEvent.getOrderType());
+        assertEquals(transactionFromDB.getQuantity(), transactionEvent.getQuantity());
+        assertEquals(transactionFromDB.getPrice(), transactionEvent.getPrice());
+        assertEquals(transactionFromDB.getCreatedAt(), LocalDateTime.of(2023,05,19,00,00));
+        assertEquals(transactionFromDB.getIncorrectId(), 55555L);
+        assertEquals(transactionFromDB.getError(), "Transaction canceled, can not find client id.");
 
     }
 }

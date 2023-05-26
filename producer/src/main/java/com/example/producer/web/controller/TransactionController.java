@@ -33,7 +33,7 @@ public class TransactionController {
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
     public TransactionResponse save(@RequestBody TransactionRequest transactionRequest) {
-        log.info("Send transaction from controller {}", transactionRequest);
+        log.info("Send transaction from producer controller {}", transactionRequest);
         return modelMapper.map(transactionService.sendTransaction(
                 modelMapper.map(transactionRequest, TransactionDto.class)), TransactionResponse.class);
     }

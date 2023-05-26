@@ -24,13 +24,13 @@ public class TransactionFailedServiceImpl implements TransactionFailedService {
     @Override
     @Transactional
     public TransactionFailed save(TransactionFailed transactionFailed) {
-        log.debug("Save transaction: {}", transactionFailed);
+        log.debug("Save failed transaction: {}", transactionFailed);
         return transactionFailedRepository.save(transactionFailed);
     }
 
     @Override
     public TransactionFailed getTransactionFailed(TransactionEvent transactionEvent) {
-
+        log.info("Get failed transaction from event transaction");
         return TransactionFailed.builder()
                 .bank(transactionEvent.getBank())
                 .orderType(transactionEvent.getOrderType())
@@ -45,20 +45,20 @@ public class TransactionFailedServiceImpl implements TransactionFailedService {
 
     @Override
     public List<TransactionFailed> findAll() {
-        log.info("Find all failed transaction");
+        log.info("Find all failed transactions");
         return transactionFailedRepository.findAll();
     }
 
     @Override
     public List<TransactionFailed> findByIncorrectId(Long id) {
-        log.info("Find all failed transaction");
+        log.info("Find all failed transaction by incorrect client id");
         return transactionFailedRepository.findByIncorrectId(id);
     }
 
     @Override
     @Transactional
     public void delete(Long id) {
-        log.info("Delete transaction by id: " + id);
+        log.info("Delete failed transaction by id: " + id);
         transactionFailedRepository.deleteById(id);
     }
 }

@@ -46,7 +46,7 @@ public class ClientController {
     }
     @Operation(summary = "Get client by email")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Found the email", content = {
+            @ApiResponse(responseCode = "200", description = "Get client by email", content = {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ClientResponse.class))}),
             @ApiResponse(responseCode = "400", description = "Invalid id supplied"),
             @ApiResponse(responseCode = "404", description = "Client not found"),

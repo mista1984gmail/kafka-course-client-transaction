@@ -35,15 +35,16 @@ public class FakeTransaction {
     public static TransactionDto getTransactionDto(){
         return new TransactionDto(
                 "PriorBank",
-                1L,
                 OrderType.OUTCOME,
                 5,
                 2.22,
-                LocalDateTime.of(2023,05,19,15,56,00));
+                LocalDateTime.of(2023,05,19,15,56,00),
+                new BigDecimal(11.1),
+                FakeClient.getClient());
     }
     public static TransactionFailed getTransactionFailed(){
         return new TransactionFailed(
-                1L,
+                55555L,
                 "PriorBank",
                 OrderType.OUTCOME,
                 5,
@@ -53,5 +54,15 @@ public class FakeTransaction {
                 5L,
                 "Transaction canceled, can not find client id."
                 );
+    }
+
+    public static TransactionEvent getTransactionEventFailed(){
+        return new TransactionEvent(
+                "PriorBank",
+                55555L,
+                OrderType.OUTCOME,
+                5,
+                2.22,
+                LocalDateTime.of(2023,05,19,15,56,00));
     }
 }

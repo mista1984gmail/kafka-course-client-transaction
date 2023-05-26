@@ -30,7 +30,7 @@ public class Transaction {
 
     @Column(name="order_type",
             nullable = false)
-    @Enumerated(value = EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     private OrderType orderType;
 
     @Column(name="quantity",

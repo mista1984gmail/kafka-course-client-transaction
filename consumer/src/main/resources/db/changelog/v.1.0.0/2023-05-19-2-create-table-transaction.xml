@@ -6,6 +6,8 @@
 
     <changeSet logicalFilePath="2023-05-19-2-create-table-transaction"
                id="2023-05-19-1-create-table-transaction" author="s.m">
+        <sql>CREATE TYPE order_type AS ENUM ('INCOME','OUTCOME')</sql>
+        <sql>CREATE CAST (varchar AS order_type) WITH INOUT AS IMPLICIT</sql>
         <createTable tableName="transaction">
             <column name="id" type="serial">
                 <constraints nullable="false" primaryKey="true"/>
@@ -13,7 +15,7 @@
             <column name="bank" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
-            <column name="order_type" type="varchar(255)">
+            <column name="order_type" type="order_type">
                 <constraints nullable="false"/>
             </column>
             <column name="quantity" type="INT">

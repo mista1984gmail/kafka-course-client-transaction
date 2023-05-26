@@ -46,7 +46,7 @@ public class ClientController {
         if (emailBinding.hasErrors()) {
             throw new ClientWithEmailExistException("Client with email " + clientRequest.getEmail() + " exist");
         }
-        log.info("Send client from controller {}", clientRequest);
+        log.info("Send client from producer controller {}", clientRequest);
         return modelMapper.map(clientService.sendClient(
                 modelMapper.map(clientRequest, ClientDto.class)), ClientResponse.class);
     }

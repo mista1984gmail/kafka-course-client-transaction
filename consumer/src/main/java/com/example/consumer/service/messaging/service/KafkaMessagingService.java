@@ -27,7 +27,7 @@ public class KafkaMessagingService {
     @Transactional
     @KafkaListener(topics = topicCreateClient, groupId = kafkaConsumerGroupId, containerFactory = "clientContainerFactory")
     public ClientEvent createClient(ClientEvent clientEvent) {
-        log.info("message consumed {}", clientEvent);
+        log.info("Message consumed {}", clientEvent);
         clientService.save(modelMapper.map(clientEvent, ClientDto.class));
         return clientEvent;
     }
@@ -35,7 +35,7 @@ public class KafkaMessagingService {
     @Transactional
     @KafkaListener(topics = topicCreateTransaction, groupId = kafkaConsumerGroupId, containerFactory = "transactionContainerFactory")
     public TransactionEvent createTransaction(TransactionEvent transactionEvent) {
-        log.info("message consumed {}", transactionEvent);
+        log.info("Message consumed {}", transactionEvent);
         if (clientService.isExistClient(transactionEvent.getClientId())) {
             clientService.save(
                     modelMapper.map(clientService.addTransactionToClient(transactionEvent), ClientDto.class));
