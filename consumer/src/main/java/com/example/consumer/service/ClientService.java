@@ -17,4 +17,7 @@ public interface ClientService {
     boolean isExistClient(Long id);
     Client addTransactionToClient(TransactionEvent transactionEvent);
     Optional<Client> findByEmail(String email);
+
+    Client findByClientCode(String code);
+    boolean existsByClientCode(String code);
 }

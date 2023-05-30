@@ -11,7 +11,9 @@ public class FakeClient {
                 "Ivanov",
                 "Grodno, Pobedy, 123/45",
                 "ivan2000@gmail.com",
-                "375291234567");
+                "375291234567",
+                "9be58def-859d-43b8-aacd-682c74419030"
+                );
     }
 
 }

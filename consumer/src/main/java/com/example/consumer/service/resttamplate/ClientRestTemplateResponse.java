@@ -15,4 +15,5 @@ public class ClientRestTemplateResponse {
     private String address;
     private String email;
     private String telephone;
+    private String clientCode;
 }

@@ -14,11 +14,13 @@ public class FakeTransaction {
     public static TransactionEvent getTransactionEvent(){
         return new TransactionEvent(
                 "PriorBank",
-                1L,
                 OrderType.OUTCOME,
                 5,
                 2.22,
-                LocalDateTime.of(2023,05,19,15,56,00));
+                LocalDateTime.of(2023,05,19,15,56,00),
+                "9be58def-859d-43b8-aacd-682c74419030"
+
+        );
     }
     public static Transaction getTransaction(){
         return new Transaction(
@@ -29,6 +31,7 @@ public class FakeTransaction {
                 2.22,
                 LocalDateTime.of(2023,05,19,15,56,00),
                 new BigDecimal(11.1),
+                "9be58def-859d-43b8-aacd-682c74419030",
                 FakeClient.getClient());
 
     }
@@ -40,18 +43,19 @@ public class FakeTransaction {
                 2.22,
                 LocalDateTime.of(2023,05,19,15,56,00),
                 new BigDecimal(11.1),
+                "9be58def-859d-43b8-aacd-682c74419030",
                 FakeClient.getClient());
     }
     public static TransactionFailed getTransactionFailed(){
         return new TransactionFailed(
-                55555L,
+                1L,
                 "PriorBank",
                 OrderType.OUTCOME,
                 5,
                 2.22,
                 LocalDateTime.of(2023,05,19,15,56,00),
                 new BigDecimal(11.1),
-                5L,
+                "9be58def-859d-43b8-aacd-682c74419039",
                 "Transaction canceled, can not find client id."
                 );
     }
@@ -59,10 +63,10 @@ public class FakeTransaction {
     public static TransactionEvent getTransactionEventFailed(){
         return new TransactionEvent(
                 "PriorBank",
-                55555L,
                 OrderType.OUTCOME,
                 5,
                 2.22,
-                LocalDateTime.of(2023,05,19,15,56,00));
+                LocalDateTime.of(2023,05,19,15,56,00),
+                "9be58def-859d-43b8-aacd-682c74419039");
     }
 }

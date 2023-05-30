@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Data
@@ -13,9 +14,9 @@ import java.time.LocalDateTime;
 public class TransactionResponse {
 
     private String bank;
-    private Long clientId;
     private OrderType orderType;
     private Integer quantity;
     private Double price;
     private LocalDateTime createdAt;
+    private String clientUniqueCode;
 }

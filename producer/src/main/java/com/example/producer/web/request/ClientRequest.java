@@ -4,6 +4,7 @@ import com.example.producer.web.validator.PhoneNumber;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.UniqueElements;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
@@ -25,4 +26,7 @@ public class ClientRequest {
 
     @PhoneNumber
     private String telephone;
+
+    @NotNull
+    private String clientCode;
 }

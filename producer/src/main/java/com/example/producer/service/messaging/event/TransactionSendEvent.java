@@ -13,9 +13,9 @@ import java.time.LocalDateTime;
 public class TransactionSendEvent {
 
     private String bank;
-    private Long clientId;
     private OrderType orderType;
     private Integer quantity;
     private Double price;
     private LocalDateTime createdAt;
+    private String clientUniqueCode;
 }

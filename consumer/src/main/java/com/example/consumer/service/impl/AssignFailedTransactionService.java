@@ -34,12 +34,12 @@ public class AssignFailedTransactionService {
         log.info("Find all failed transactions");
         List<TransactionFailed> transactionFaileds = transactionFailedService.findAll();
         log.info("On schedule: checking for a valid client");
-        Set<Long> clientsIds = transactionFaileds.stream()
-                .map(TransactionFailed::getIncorrectId).collect(Collectors.toSet());
-        for (Long id : clientsIds) {
-            if(clientService.isExistClient(id)){
-                Client client = modelMapper.map(clientService.findById(id), Client.class);
-                List<TransactionFailed>transactionFailedWithFoundClient = transactionFailedService.findByIncorrectId(id);
+        Set<String> clientsCodes = transactionFaileds.stream()
+                .map(TransactionFailed::getIncorrectClientUniqueCode).collect(Collectors.toSet());
+        for (String code : clientsCodes) {
+            if(clientService.existsByClientCode(code)){
+                Client client = modelMapper.map(clientService.findByClientCode(code), Client.class);
+                List<TransactionFailed>transactionFailedWithFoundClient = transactionFailedService.findByIncorrectClientUniqueCode(code);
                 for (TransactionFailed transactionFailed : transactionFailedWithFoundClient) {
                     Transaction transaction = Transaction.builder()
                             .bank(transactionFailed.getBank())
@@ -49,6 +49,7 @@ public class AssignFailedTransactionService {
                             .price(transactionFailed.getPrice())
                             .totalCost(new BigDecimal(transactionFailed.getQuantity() * transactionFailed.getPrice()))
                             .createdAt(transactionFailed.getCreatedAt())
+                            .clientUniqueCode(transactionFailed.getIncorrectClientUniqueCode())
                             .build();
                     transactionService.save(modelMapper.map(transaction, TransactionDto.class));
                     transactionFailedService.delete(transactionFailed.getId());

@@ -38,7 +38,7 @@ public class TransactionFailedServiceImpl implements TransactionFailedService {
                 .price(transactionEvent.getPrice())
                 .totalCost(new BigDecimal(transactionEvent.getQuantity() * transactionEvent.getPrice()))
                 .createdAt(transactionEvent.getCreatedAt())
-                .incorrectId(transactionEvent.getClientId())
+                .incorrectClientUniqueCode(transactionEvent.getClientUniqueCode())
                 .error(ErrorName.NOT_FOUND_CLIENT_ID)
                 .build();
     }
@@ -50,10 +50,11 @@ public class TransactionFailedServiceImpl implements TransactionFailedService {
     }
 
     @Override
-    public List<TransactionFailed> findByIncorrectId(Long id) {
-        log.info("Find all failed transaction by incorrect client id");
-        return transactionFailedRepository.findByIncorrectId(id);
+    public List<TransactionFailed> findByIncorrectClientUniqueCode(String code) {
+        log.info("Find all failed transaction by incorrect client code");
+        return transactionFailedRepository.findByIncorrectClientUniqueCode(code);
     }
+
 
     @Override
     @Transactional

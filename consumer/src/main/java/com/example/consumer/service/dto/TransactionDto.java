@@ -20,5 +20,19 @@ public class TransactionDto {
     private Double price;
     private LocalDateTime createdAt;
     private BigDecimal totalCost;
+    private String clientUniqueCode;
     private Client owner;
+
+    @Override
+    public String toString() {
+        return "TransactionDto{" +
+                "bank='" + bank + '\'' +
+                ", orderType=" + orderType +
+                ", quantity=" + quantity +
+                ", price=" + price +
+                ", createdAt=" + createdAt +
+                ", totalCost=" + totalCost +
+                ", clientUniqueCode='" + clientUniqueCode + '\'' +
+                '}';
+    }
 }

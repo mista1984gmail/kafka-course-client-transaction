@@ -61,7 +61,7 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public Client addTransactionToClient(TransactionEvent transactionEvent) {
-        Client client = modelMapper.map(findById(transactionEvent.getClientId()), Client.class);
+        Client client = modelMapper.map(findByClientCode(transactionEvent.getClientUniqueCode()), Client.class);
 
         Transaction transaction = Transaction.builder()
                 .bank(transactionEvent.getBank())
@@ -71,6 +71,7 @@ public class ClientServiceImpl implements ClientService {
                 .price(transactionEvent.getPrice())
                 .totalCost(new BigDecimal(transactionEvent.getQuantity() * transactionEvent.getPrice()))
                 .createdAt(transactionEvent.getCreatedAt())
+                .clientUniqueCode(transactionEvent.getClientUniqueCode())
                 .build();
 
         log.info("Add transaction to client");
@@ -86,9 +87,27 @@ public class ClientServiceImpl implements ClientService {
 
     }
 
+    @Override
+    public Client findByClientCode(String code) {
+        log.info("Find client by client code: {}", code);
+        return getByCode(code);
+    }
+
+    @Override
+    public boolean existsByClientCode(String code) {
+        log.info("Checking exist client");
+        return clientRepository.existsByClientCode(code);
+    }
+
     private Client getById(Long id) {
         return clientRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Client with id: " + id + " not found"));
+    }
+
+    private Client getByCode(String code) {
+        return clientRepository.findByClientCode(code)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Client with id: " + code + " not found"));
     }
 }

@@ -1,5 +1,6 @@
 package com.example.producer.service.messaging.service;
 
+//import com.example.producer.service.messaging.event.ClientSendEvent;
 import com.example.producer.service.messaging.event.ClientSendEvent;
 import com.example.producer.service.messaging.event.TransactionSendEvent;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +19,10 @@ public class KafkaMessagingService {
     private final KafkaTemplate<String , Object> kafkaTemplate;
 
     public void sendClient(ClientSendEvent clientSendEvent) {
-       kafkaTemplate.send(sendClientTopic, clientSendEvent);
+       kafkaTemplate.send(sendClientTopic, clientSendEvent.getClientCode(), clientSendEvent);
     }
 
     public void sendTransaction(TransactionSendEvent transactionSendEvent) {
-        this.kafkaTemplate.send(sendTransactionTopic, transactionSendEvent);
+        this.kafkaTemplate.send(sendTransactionTopic, transactionSendEvent.getClientUniqueCode(), transactionSendEvent);
     }
 }

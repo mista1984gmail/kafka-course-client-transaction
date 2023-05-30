@@ -26,7 +26,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="total_cost" type="numeric(19, 2)"/>
-            <column name="incorrect_id" type="BIGINT"/>
+            <column name="incorrect_client_unique_code" type="varchar(255)"/>
             <column name="error" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>

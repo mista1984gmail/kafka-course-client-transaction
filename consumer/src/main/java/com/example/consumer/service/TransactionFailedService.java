@@ -10,6 +10,6 @@ public interface TransactionFailedService {
     TransactionFailed save(TransactionFailed transactionFailed);
     TransactionFailed getTransactionFailed(TransactionEvent transactionEvent);
     List<TransactionFailed> findAll();
-    List<TransactionFailed> findByIncorrectId(Long id);
+    List<TransactionFailed> findByIncorrectClientUniqueCode(String code);
     void delete(Long id);
 }

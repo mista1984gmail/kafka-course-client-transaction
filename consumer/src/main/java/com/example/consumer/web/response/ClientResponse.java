@@ -18,5 +18,6 @@ public class ClientResponse {
     private String address;
     private String email;
     private String telephone;
+    private String clientCode;
     private List<Transaction> transactions;
 }

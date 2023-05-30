@@ -29,6 +29,9 @@
             </column>
             <column name="total_cost" type="numeric(19, 2)"/>
             <column name="client_id" type="BIGINT"/>
+            <column name="client_unique_code" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
     <changeSet author="s.m." id="2023-05-19-1-create-table-transaction-2">

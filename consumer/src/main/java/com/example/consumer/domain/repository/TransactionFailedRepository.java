@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface TransactionFailedRepository extends JpaRepository<TransactionFailed, Long> {
-    List<TransactionFailed> findByIncorrectId(Long id);
+    List<TransactionFailed> findByIncorrectClientUniqueCode(String code);
 }

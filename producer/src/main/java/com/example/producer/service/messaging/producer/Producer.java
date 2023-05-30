@@ -2,6 +2,7 @@ package com.example.producer.service.messaging.producer;
 
 import com.example.producer.service.dto.ClientDto;
 import com.example.producer.service.dto.TransactionDto;
+//import com.example.producer.service.messaging.event.ClientSendEvent;
 import com.example.producer.service.messaging.event.ClientSendEvent;
 import com.example.producer.service.messaging.event.TransactionSendEvent;
 import com.example.producer.service.messaging.service.KafkaMessagingService;

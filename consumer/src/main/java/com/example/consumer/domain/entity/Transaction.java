@@ -48,6 +48,10 @@ public class Transaction {
     @Column(name="total_cost")
     private BigDecimal totalCost;
 
+    @Column(name="client_unique_code",
+            nullable = false)
+    private String clientUniqueCode;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name="client_id")
     @Fetch(FetchMode.JOIN)

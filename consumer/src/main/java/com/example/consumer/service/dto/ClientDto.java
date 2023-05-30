@@ -19,13 +19,15 @@ public class ClientDto {
     private String address;
     private String telephone;
     private String email;
+    private String clientCode;
     private List<Transaction> transactions;
 
-    public ClientDto(String firstName, String lastName, String address, String email, String telephone) {
+    public ClientDto(String firstName, String lastName, String address, String email, String telephone, String clientCode) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.address = address;
         this.email = email;
         this.telephone = telephone;
+        this.clientCode = clientCode;
     }
 }

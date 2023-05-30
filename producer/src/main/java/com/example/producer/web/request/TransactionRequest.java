@@ -15,8 +15,6 @@ public class TransactionRequest {
     @NotNull
     private String bank;
     @NotNull
-    private Long clientId;
-    @NotNull
     private OrderType orderType;
     @NotNull
     private Integer quantity;
@@ -24,4 +22,6 @@ public class TransactionRequest {
     private Double price;
     @NotNull
     private LocalDateTime createdAt;
+    @NotNull
+    private String clientUniqueCode;
 }

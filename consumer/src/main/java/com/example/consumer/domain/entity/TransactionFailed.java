@@ -48,8 +48,8 @@ public class TransactionFailed {
     @Column(name="total_cost")
     private BigDecimal totalCost;
 
-    @Column(name="incorrect_id")
-    private Long incorrectId;
+    @Column(name="incorrect_client_unique_code")
+    private String incorrectClientUniqueCode;
 
     @Column(name="error",
             nullable = false)

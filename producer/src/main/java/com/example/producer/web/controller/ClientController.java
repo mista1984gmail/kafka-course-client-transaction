@@ -5,6 +5,7 @@ import com.example.producer.service.ClientService;
 import com.example.producer.service.dto.ClientDto;
 import com.example.producer.web.request.ClientRequest;
 import com.example.producer.web.response.ClientResponse;
+import com.example.producer.web.validator.CodeValidator;
 import com.example.producer.web.validator.EmailValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -32,6 +33,7 @@ public class ClientController {
     private final ClientService clientService;
     private final ModelMapper modelMapper;
     private final EmailValidator emailValidator;
+    private final CodeValidator codeValidator;
 
     @Operation(summary = "Save client")
     @ApiResponses(value = {
@@ -40,11 +42,16 @@ public class ClientController {
             @ApiResponse(responseCode = "500", description = "Internal server error")})
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
-    public ClientResponse save( @Valid @RequestBody ClientRequest clientRequest,  BindingResult emailBinding) {
+    public ClientResponse save( @Valid @RequestBody ClientRequest clientRequest,  BindingResult emailBinding, BindingResult codeBinding) {
         log.info("Validate client by unique email");
         emailValidator.validate(clientRequest, emailBinding);
         if (emailBinding.hasErrors()) {
             throw new ClientWithEmailExistException("Client with email " + clientRequest.getEmail() + " exist");
+        }
+        log.info("Validate client by unique code");
+        codeValidator.validate(clientRequest, codeBinding);
+        if (codeBinding.hasErrors()) {
+            throw new ClientWithEmailExistException("Client with code " + clientRequest.getClientCode() + " exist");
         }
         log.info("Send client from producer controller {}", clientRequest);
         return modelMapper.map(clientService.sendClient(

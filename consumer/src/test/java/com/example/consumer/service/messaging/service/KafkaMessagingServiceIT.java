@@ -6,6 +6,7 @@ import com.example.consumer.domain.entity.TransactionFailed;
 import com.example.consumer.domain.repository.ClientRepository;
 import com.example.consumer.domain.repository.TransactionFailedRepository;
 import com.example.consumer.domain.repository.TransactionRepository;
+
 import com.example.consumer.service.messaging.event.ClientEvent;
 import com.example.consumer.service.messaging.event.TransactionEvent;
 import com.example.util.FakeClient;
@@ -109,11 +110,11 @@ class KafkaMessagingServiceIT {
 
         //when
         TimeUnit.SECONDS.sleep(5);
-        kafkaTemplate.send(TOPIC_NAME_SEND_CLIENT, clientEvent);
+        kafkaTemplate.send(TOPIC_NAME_SEND_CLIENT, clientEvent.getClientCode(), clientEvent);
         TimeUnit.SECONDS.sleep(5);
 
         //then
-        Client clientFromDB = clientRepository.findById(CLIENT_ID).get();
+        Client clientFromDB = clientRepository.findByClientCode(client.getClientCode()).get();
         assertEquals(clientFromDB.getId(), CLIENT_ID);
         assertEquals(clientFromDB.getFirstName(), client.getFirstName());
         assertEquals(clientFromDB.getLastName(), client.getLastName());
@@ -140,7 +141,7 @@ class KafkaMessagingServiceIT {
 
         //when
         TimeUnit.SECONDS.sleep(5);
-        kafkaTemplateTransaction.send(TOPIC_NAME_SEND_TRANSACTION, transactionEvent);
+        kafkaTemplateTransaction.send(TOPIC_NAME_SEND_TRANSACTION, transactionEvent.getClientUniqueCode(), transactionEvent);
         TimeUnit.SECONDS.sleep(5);
 
         //then
@@ -171,7 +172,7 @@ class KafkaMessagingServiceIT {
 
         //when
         TimeUnit.SECONDS.sleep(5);
-        kafkaTemplate.send(TOPIC_NAME_SEND_TRANSACTION, transactionEvent);
+        kafkaTemplate.send(TOPIC_NAME_SEND_TRANSACTION, transactionEvent.getClientUniqueCode(), transactionEvent);
         TimeUnit.SECONDS.sleep(5);
 
         //then
@@ -182,8 +183,8 @@ class KafkaMessagingServiceIT {
         assertEquals(transactionFromDB.getQuantity(), transactionEvent.getQuantity());
         assertEquals(transactionFromDB.getPrice(), transactionEvent.getPrice());
         assertEquals(transactionFromDB.getCreatedAt(), LocalDateTime.of(2023,05,19,00,00));
-        assertEquals(transactionFromDB.getIncorrectId(), 55555L);
-        assertEquals(transactionFromDB.getError(), "Transaction canceled, can not find client id.");
+        assertEquals(transactionFromDB.getIncorrectClientUniqueCode(), transactionEvent.getClientUniqueCode());
+        assertEquals(transactionFromDB.getError(), "Transaction canceled, can not find client unique code.");
 
     }
 }

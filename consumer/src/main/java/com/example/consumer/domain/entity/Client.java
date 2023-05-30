@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -29,19 +30,24 @@ public class Client {
     private String email;
     @Column(name = "telephone")
     private String telephone;
+
+    @Column(name = "client_code", unique = true, nullable = false)
+    private String clientCode;
+
     @OneToMany(mappedBy = "owner", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JsonIgnore
-    private List<Transaction> transactions;
+    private List<Transaction> transactions = new ArrayList<>();
 
     public void addTransaction(Transaction transaction){
         transactions.add(transaction);
     }
 
-    public Client(String firstName, String lastName, String address, String email, String telephone) {
+    public Client(String firstName, String lastName, String address, String email, String telephone, String clientCode) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.address = address;
         this.email = email;
         this.telephone = telephone;
+        this.clientCode = clientCode;
     }
 }

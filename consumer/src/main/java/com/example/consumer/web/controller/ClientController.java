@@ -1,6 +1,7 @@
 package com.example.consumer.web.controller;
 
 import com.example.consumer.domain.entity.Client;
+import com.example.consumer.exception.EntityNotFoundException;
 import com.example.consumer.service.ClientService;
 import com.example.consumer.service.resttamplate.ClientRestTemplateResponse;
 import com.example.consumer.web.response.ClientResponse;
@@ -17,6 +18,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,7 +49,7 @@ public class ClientController {
     @Operation(summary = "Get client by email")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Get client by email", content = {
-                    @Content(mediaType = "application/json", schema = @Schema(implementation = ClientResponse.class))}),
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ClientRestTemplateResponse.class))}),
             @ApiResponse(responseCode = "400", description = "Invalid id supplied"),
             @ApiResponse(responseCode = "404", description = "Client not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")})
@@ -56,6 +58,26 @@ public class ClientController {
     public ClientRestTemplateResponse findByEmail(@RequestParam String email) {
         log.info("Find client with email: {}", email);
         return modelMapper.map(clientService.findByEmail(email).orElse(new Client()), ClientRestTemplateResponse.class);
+    }
+
+    @Operation(summary = "Get client by code")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Get client by code", content = {
+                    @Content(mediaType = "application/json", schema = @Schema(implementation = ClientRestTemplateResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Invalid id supplied"),
+            @ApiResponse(responseCode = "404", description = "Client not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")})
+    @GetMapping("/{code}")
+    @ResponseStatus(HttpStatus.OK)
+    public ClientRestTemplateResponse findByCode(@PathVariable @NotNull String code) {
+        log.info("Find client with code: {}", code);
+        Client client = new Client();
+        try{
+           client = clientService.findByClientCode(code);
+        }catch (EntityNotFoundException ex){
+            log.error(ex.getMessage());
+        }
+        return modelMapper.map(client, ClientRestTemplateResponse.class);
     }
 
 

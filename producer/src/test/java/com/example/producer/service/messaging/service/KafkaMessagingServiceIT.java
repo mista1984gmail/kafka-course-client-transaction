@@ -28,7 +28,8 @@ import java.util.Properties;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-@SpringBootTest(properties = "spring.main.allow-bean-definition-overriding=true")
+@SpringBootTest(properties = {"spring.main.allow-bean-definition-overriding=true",
+                                "spring.mvc.pathmatch.matching-strategy = ANT_PATH_MATCHER"})
 @Testcontainers
 class KafkaMessagingServiceIT {
 
@@ -80,6 +81,7 @@ class KafkaMessagingServiceIT {
         assertEquals(client.getAddress(), records.iterator().next().value().getAddress());
         assertEquals(client.getEmail(), records.iterator().next().value().getEmail());
         assertEquals(client.getTelephone(), records.iterator().next().value().getTelephone());
+        assertEquals(client.getClientCode(), records.iterator().next().value().getClientCode());
 
     }
 
@@ -107,7 +109,7 @@ class KafkaMessagingServiceIT {
         //then
         assertEquals(1, records.count());
         assertEquals(transaction.getBank(), records.iterator().next().value().getBank());
-        assertEquals(transaction.getClientId(), records.iterator().next().value().getClientId());
+        assertEquals(transaction.getClientUniqueCode(), records.iterator().next().value().getClientUniqueCode());
         assertEquals(transaction.getOrderType(), records.iterator().next().value().getOrderType());
         assertEquals(transaction.getQuantity(), records.iterator().next().value().getQuantity());
         assertEquals(transaction.getPrice(), records.iterator().next().value().getPrice());
