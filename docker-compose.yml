@@ -33,6 +33,11 @@ services:
 
   zookeeper:
     image: confluentinc/cp-zookeeper:6.2.4
+    healthcheck:
+      test: [ "CMD", "nc", "-vz", "localhost", "2181" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -42,7 +47,8 @@ services:
   kafka:
     image: confluentinc/cp-kafka:6.2.4
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
     ports:
       - 29092:29092
     healthcheck:
@@ -66,7 +72,8 @@ services:
       - "8080:8080"
     restart: always
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     environment:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
