@@ -6,7 +6,6 @@ import com.example.consumer.domain.entity.TransactionFailed;
 import com.example.consumer.domain.repository.ClientRepository;
 import com.example.consumer.domain.repository.TransactionFailedRepository;
 import com.example.consumer.domain.repository.TransactionRepository;
-
 import com.example.consumer.service.messaging.event.ClientEvent;
 import com.example.consumer.service.messaging.event.TransactionEvent;
 import com.example.util.FakeClient;
@@ -40,15 +39,16 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Testcontainers
+@SpringBootTest(properties = {"spring.main.allow-bean-definition-overriding=true",
+        "spring.mvc.pathmatch.matching-strategy = ANT_PATH_MATCHER"})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class KafkaMessagingServiceIT {
     public static final Long CLIENT_ID = 1L;
     public static final Long TRANSACTIONAL_ID = 1L;
     public static final Long TRANSACTIONAL_FAILED_ID = 1L;
-    public static final String TOPIC_NAME_SEND_CLIENT = "send.client";
-    public static final String TOPIC_NAME_SEND_TRANSACTION = "send.transaction";
+    public static final String TOPIC_NAME_SEND_CLIENT = "send-client";
+    public static final String TOPIC_NAME_SEND_TRANSACTION = "send-transaction";
 
     @Container
     static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:12")
@@ -70,6 +70,7 @@ class KafkaMessagingServiceIT {
           .withEnv("KAFKA_TRANSACTION_STATE_LOG_MIN_ISR", "1")
           .withEnv("KAFKA_LOG_FLUSH_INTERVAL_MESSAGES", Long.MAX_VALUE + "")
           .withEnv("KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS", "0");
+
 
     static {
         Startables.deepStart(Stream.of(postgreSQLContainer, kafkaContainer)).join();
@@ -114,6 +115,7 @@ class KafkaMessagingServiceIT {
         TimeUnit.SECONDS.sleep(5);
 
         //then
+        //clientRepository.save(client);
         Client clientFromDB = clientRepository.findByClientCode(client.getClientCode()).get();
         assertEquals(clientFromDB.getId(), CLIENT_ID);
         assertEquals(clientFromDB.getFirstName(), client.getFirstName());

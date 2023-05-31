@@ -1,4 +1,35 @@
 services:
+  client-consumer:
+    image: client-consumer:0.0.1
+    build:
+      context: .
+      dockerfile: consumer/Dockerfile
+    ports:
+      - "8082:8082"
+    depends_on:
+      service-db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      - SERVER_PORT= 8082
+      - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://service-db/clients_database
+
+  client-producer:
+    image: client-producer:0.0.1
+    build:
+      context: .
+      dockerfile: producer/Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      - SERVER_PORT= 8081
+      - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
+      - RESTTEMPLATE_CONSUMER_CLIENT_APIHOST=http://client-consumer:8082
 
   zookeeper:
     image: confluentinc/cp-zookeeper:6.2.4
@@ -14,6 +45,11 @@ services:
       - zookeeper
     ports:
       - 29092:29092
+    healthcheck:
+      test: [ "CMD", "nc", "-vz", "localhost", "9092" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -40,11 +76,11 @@ services:
     environment:
       POSTGRES_USER: username
       POSTGRES_PASSWORD: password
-#    healthcheck:
-#      test: ["CMD-SHELL", "pg_isready", "-d", "clients_database"]
-#      interval: 10s
-#      timeout: 3s
-#      retries: 3
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "clients_database"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
     ports:
       - "15432:5432"
     volumes:

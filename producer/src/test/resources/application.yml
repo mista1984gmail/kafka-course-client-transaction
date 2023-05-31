@@ -1,13 +1,5 @@
-server:
-  port: 8081
-
-topic:
-  send-client: send-client
-  send-transaction: send-transaction
-
 spring:
   kafka:
-    bootstrap-servers: localhost:29092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -19,11 +11,7 @@ spring:
               type:
                 headers: false
 
-  mvc:
-    pathmatch:
-      matching-strategy: ant_path_matcher
 
-resttemplate:
-  consumer:
-    client:
-      apihost: http://localhost:8082
+topic:
+  send-client: send-client
+  send-transaction: send-transaction

@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -33,8 +34,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Testcontainers
 class KafkaMessagingServiceIT {
 
-    public static final String TOPIC_NAME_SEND_CLIENT = "send.client";
-    public static final String TOPIC_NAME_SEND_TRANSACTION = "send.transaction";
+    public static final String TOPIC_NAME_SEND_CLIENT = "send-client";
+    public static final String TOPIC_NAME_SEND_TRANSACTION = "send-transaction";
    @Container
    static final KafkaContainer kafka = new KafkaContainer(
            DockerImageName.parse("confluentinc/cp-kafka:7.3.3")
@@ -69,6 +70,7 @@ class KafkaMessagingServiceIT {
         properties.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, "group-java-test");
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        properties.put(JsonDeserializer.VALUE_DEFAULT_TYPE, ClientSendEvent.class);
         KafkaConsumer<String, ClientSendEvent> consumer = new KafkaConsumer<>(properties);
         consumer.subscribe(Arrays.asList(TOPIC_NAME_SEND_CLIENT));
         ConsumerRecords <String, ClientSendEvent>records = consumer.poll(Duration.ofMillis(10000L));
@@ -101,6 +103,7 @@ class KafkaMessagingServiceIT {
         properties.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, "group-java-test");
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        properties.put(JsonDeserializer.VALUE_DEFAULT_TYPE, TransactionSendEvent.class);
         KafkaConsumer<String, TransactionSendEvent> consumer = new KafkaConsumer<>(properties);
         consumer.subscribe(Arrays.asList(TOPIC_NAME_SEND_TRANSACTION));
         ConsumerRecords <String, TransactionSendEvent>records = consumer.poll(Duration.ofMillis(10000L));

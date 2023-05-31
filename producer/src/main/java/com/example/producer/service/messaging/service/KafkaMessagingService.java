@@ -1,6 +1,5 @@
 package com.example.producer.service.messaging.service;
 
-//import com.example.producer.service.messaging.event.ClientSendEvent;
 import com.example.producer.service.messaging.event.ClientSendEvent;
 import com.example.producer.service.messaging.event.TransactionSendEvent;
 import lombok.RequiredArgsConstructor;
